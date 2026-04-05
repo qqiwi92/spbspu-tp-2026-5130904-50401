@@ -7,7 +7,16 @@
 #include <unordered_map>
 #include <vector>
 namespace levkin {
-using Note = std::vector<std::string>;
+class Note {
+public:
+    Note(std::string s);
+    void addContent(std::string c);
+
+private:
+    std::string id;
+    std::vector<std::string> content;
+};
+
 using Database = std::unordered_map<std::string, std::shared_ptr<Note>>;
 using cmd_t = void (*)(std::istream&, std::ostream&, Database&);
 using Cmds = std::unordered_map<std::string, cmd_t>;
@@ -22,20 +31,7 @@ void mind(std::istream& in, std::ostream& out, Database& db);
 void expired(std::istream& in, std::ostream& out, Database& db);
 void refresh(std::istream& in, std::ostream& out, Database& db);
 
-Cmds getCmds()
-{
-    Cmds cmds;
-    cmds["note"] = note;
-    cmds["line"] = line;
-    cmds["show"] = show;
-    cmds["drop"] = drop; 
-    cmds["link"] = link;
-    cmds["halt"] = halt;
-    cmds["mind"] = mind;
-    cmds["expired"] = expired;
-    cmds["refresh"] = refresh;
-    return cmds;
-}
+Cmds getCmds();
 }
 
 #endif
