@@ -1,6 +1,24 @@
+#include "commands.hpp"
+#include "utils.hpp"
 #include <iostream>
+#include <string>
 
 int main()
 {
-    return 0;
+    std::string current;
+    using namespace levkin;
+    Cmds cmds = getCmds();
+    Database db;
+    while (std::cin >> current) {
+        try {
+            cmds.at(current)(std::cin, std::cout, db);
+        } catch (const std::logic_error& e) {
+            std::cout << "<INVALID COMMAND: " << e.what() << ">\n";
+        }
+    }
+
+    if (!std::cin.eof()) {
+        std::cerr << "Bad input\n";
+        return 1;
+    }
 }
