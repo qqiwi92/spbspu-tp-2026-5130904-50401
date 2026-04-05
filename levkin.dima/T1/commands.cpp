@@ -1,19 +1,41 @@
-#ifndef COMMANDS
-#define COMMANDS
-
+#include "commands.hpp"
+#include "utils.hpp"
 #include <iostream>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 namespace levkin {
-using Note = std::vector<std::string>;
+Note::Note(std::string s)
+    : id(std::move(s))
+    , content() {};
+
+void Note::addContent(std::string s)
+{
+    content.push_back(std::move(s));
+}
 using Database = std::unordered_map<std::string, std::shared_ptr<Note>>;
 using cmd_t = void (*)(std::istream&, std::ostream&, Database&);
 using Cmds = std::unordered_map<std::string, cmd_t>;
 
-void note(std::istream& in, std::ostream& out, Database& db);
-void line(std::istream& in, std::ostream& out, Database& db);
+void note(std::istream& in, std::ostream&, Database& db)
+{
+    std::string name = getWord(in);
+    if (name.empty())
+        return;
+    db[name] = std::make_shared<Note>(name);
+}
+
+void line(std::istream& in, std::ostream&, Database& db)
+{
+    std::string name = getWord(in);
+    if (db.count(name)) {
+        std::shared_ptr<Note> curr = db[name];
+        curr->addContent(getQuote(in));
+    } else {
+        throw std::logic_error("don't know this note yet\n");
+    }
+}
 void show(std::istream& in, std::ostream& out, Database& db);
 void drop(std::istream& in, std::ostream& out, Database& db);
 void link(std::istream& in, std::ostream& out, Database& db);
@@ -28,7 +50,7 @@ Cmds getCmds()
     cmds["note"] = note;
     cmds["line"] = line;
     cmds["show"] = show;
-    cmds["drop"] = drop; 
+    cmds["drop"] = drop;
     cmds["link"] = link;
     cmds["halt"] = halt;
     cmds["mind"] = mind;
@@ -37,5 +59,3 @@ Cmds getCmds()
     return cmds;
 }
 }
-
-#endif
