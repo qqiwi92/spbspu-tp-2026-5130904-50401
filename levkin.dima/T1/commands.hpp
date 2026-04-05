@@ -26,7 +26,14 @@ Cmds getCmds()
     Cmds cmds;
 
     cmds["note"] = note;
-
+    cmds["line"] = line;
+    cmds["show"] = show;
+    cmds["drop"] = drop; 
+    cmds["link"] = link;
+    cmds["halt"] = halt;
+    cmds["mind"] = mind;
+    cmds["expired"] = expired;
+    cmds["refresh"] = refresh;
     return cmds;
 }
 }
