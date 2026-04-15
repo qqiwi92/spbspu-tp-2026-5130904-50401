@@ -33,31 +33,34 @@ void note(std::istream& in, std::ostream&, Database& db)
     db[name] = std::make_shared<Note>(name);
 }
 
+auto findNote(Database& db, std::string& name)
+{
+    auto it = db.find(name);
+    if (it == db.end()) {
+        throw std::logic_error("don't know this note yet\n");
+    }
+    return it;
+}
+
 void line(std::istream& in, std::ostream&, Database& db)
 {
     std::string name = getWord(in);
-    auto it = db.find(name);
+    auto it = findNote(db, name);
 
-    if (it != db.end()) {
-        it->second->addContent(getQuote(in));
-    } else {
-        throw std::logic_error("don't know this note yet\n");
-    }
+    it->second->addContent(getQuote(in));
 }
 
 void show(std::istream& in, std::ostream& out, Database& db)
 {
     std::string name = getWord(in);
-    auto it = db.find(name);
-    if (it != db.end()) {
-        for (std::string str : it->second->getContent()) {
-            out << str;
-            out << "\n";
-        }
-    } else {
-        throw std::logic_error("don't know this note yet\n");
+    auto it = findNote(db, name);
+    
+    for (std::string str : it->second->getContent()) {
+        out << str;
+        out << "\n";
     }
 }
+
 void drop(std::istream& in, std::ostream& out, Database& db);
 void link(std::istream& in, std::ostream& out, Database& db);
 void halt(std::istream& in, std::ostream& out, Database& db);
