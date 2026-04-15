@@ -11,6 +11,7 @@ class Note {
 public:
     Note(std::string s);
     void addContent(std::string c);
+    const std::vector<std::string> &getContent() const;
 
 private:
     std::string id;

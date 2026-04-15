@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
 namespace levkin {
 Note::Note(std::string s)
     : id(std::move(s))
@@ -14,6 +15,12 @@ void Note::addContent(std::string s)
 {
     content.push_back(std::move(s));
 }
+
+const std::vector<std::string>& Note::getContent() const
+{
+    return content;
+}
+
 using Database = std::unordered_map<std::string, std::shared_ptr<Note>>;
 using cmd_t = void (*)(std::istream&, std::ostream&, Database&);
 using Cmds = std::unordered_map<std::string, cmd_t>;
@@ -37,7 +44,20 @@ void line(std::istream& in, std::ostream&, Database& db)
         throw std::logic_error("don't know this note yet\n");
     }
 }
-void show(std::istream& in, std::ostream& out, Database& db);
+
+void show(std::istream& in, std::ostream& out, Database& db)
+{
+    std::string name = getWord(in);
+    auto it = db.find(name);
+    if (it != db.end()) {
+        for (std::string str : it->second->getContent()) {
+            out << str;
+            out << "\n";
+        }
+    } else {
+        throw std::logic_error("don't know this note yet\n");
+    }
+}
 void drop(std::istream& in, std::ostream& out, Database& db);
 void link(std::istream& in, std::ostream& out, Database& db);
 void halt(std::istream& in, std::ostream& out, Database& db);
