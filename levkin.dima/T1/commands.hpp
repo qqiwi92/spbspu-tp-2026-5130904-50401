@@ -22,13 +22,26 @@ public:
     const std::vector<Link>& getLinks() const;
     void rmLink(Link ptr);
     void addLink(Link ptr);
-
+    void cleanExpired();
     const std::string& getId() const;
-    
+
 private:
     std::string id;
     std::vector<std::string> content;
     std::vector<Link> links;
+
+    template <typename F>
+    void eraseIf(F f)
+    {
+        size_t writeIndex = 0;
+        for (size_t readIndex = 0; readIndex < links.size(); ++readIndex) {
+            if (!f(links[readIndex])) {
+                links[writeIndex] = links[readIndex];
+                writeIndex++;
+            }
+        }
+        links.resize(writeIndex);
+    }
 };
 
 void note(std::istream& in, std::ostream& out, Database& db);
