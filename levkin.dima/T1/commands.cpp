@@ -139,7 +139,7 @@ namespace levkin {
     out << count;
     out << "\n";
   }
-  
+
   void refresh(std::istream& in, std::ostream& out, Database& db)
   {
     std::string name = getWord(in);
