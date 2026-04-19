@@ -22,14 +22,18 @@ void Note::rmLink(Link ptr)
     if (!target)
         return;
 
-    std::erase(
-        std::remove_if(links.begin(), links.end(),
-            [&](Link& el) {
-                return el.lock() == target;
-            }),
-        links.end());
-
-    //  TODO: two pointers
+    auto destination = links.begin();
+    size_t ind = 0;
+    for (auto from : links) {
+        auto locked = from.lock();
+        if (locked != target) {
+            links[ind++] = locked;
+        }
+    }
+    size_t removeCound = links.size() - ind - 1;
+    for (; removeCound-- >= 0;) {
+        links.pop_back();
+    }
 }
 void Note::addLink(Link ptr)
 {
