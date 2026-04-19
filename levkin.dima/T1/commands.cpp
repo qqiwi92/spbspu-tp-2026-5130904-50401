@@ -7,6 +7,10 @@
 #include "utils.hpp"
 
 namespace levkin {
+
+  using Database = std::unordered_map< std::string, std::shared_ptr< Note > >;
+  using cmd_t = void (*)(std::istream&, std::ostream&, Database&);
+  using Cmds = std::unordered_map< std::string, cmd_t >;
   Note::Note(std::string s) : id(std::move(s)), content(){};
 
   void Note::addContent(std::string s) { content.push_back(std::move(s)); }
@@ -39,9 +43,6 @@ namespace levkin {
 
   const std::vector< std::string >& Note::getContent() const { return content; }
 
-  using Database = std::unordered_map< std::string, std::shared_ptr< Note > >;
-  using cmd_t = void (*)(std::istream&, std::ostream&, Database&);
-  using Cmds = std::unordered_map< std::string, cmd_t >;
 
   void note(std::istream& in, std::ostream&, Database& db)
   {
@@ -138,6 +139,7 @@ namespace levkin {
     out << count;
     out << "\n";
   }
+  
   void refresh(std::istream& in, std::ostream& out, Database& db)
   {
     std::string name = getWord(in);

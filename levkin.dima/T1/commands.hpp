@@ -6,6 +6,9 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+
+
 namespace levkin {
   class Note;
 
@@ -13,6 +16,9 @@ namespace levkin {
   using Link = std::weak_ptr< Note >;
   using cmd_t = void (*)(std::istream&, std::ostream&, Database&);
   using Cmds = std::unordered_map< std::string, cmd_t >;
+
+
+
   class Note
   {
   public:
