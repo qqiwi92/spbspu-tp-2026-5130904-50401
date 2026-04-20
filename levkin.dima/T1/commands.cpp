@@ -52,7 +52,7 @@ void note(std::istream& in, std::ostream&, Database& db)
   if (db.find(name) != db.end()) {
     throw std::logic_error("already exists");
   }
-  [name] = std::make_shared< Note >(name);
+  db[name] = std::make_shared< Note >(name);
 }
 
 auto findNote(Database& db, std::string& name)
