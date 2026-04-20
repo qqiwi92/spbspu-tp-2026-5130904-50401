@@ -33,7 +33,7 @@ void Note::addLink(Link ptr)
 {
 for (Link curr : links) {
     if (curr.lock() == ptr.lock()) {
-    throw std::logic_error("Double linking is not allowed\n");
+    throw std::logic_error("Double linking is not allowed");
     }
 }
 links.push_back(ptr);
@@ -56,7 +56,7 @@ auto findNote(Database& db, std::string& name)
 {
 auto it = db.find(name);
 if (it == db.end()) {
-    throw std::logic_error("don't know this note yet\n");
+    throw std::logic_error("don't know this note yet");
 }
 return it;
 }
@@ -89,7 +89,7 @@ void drop(std::istream& in, std::ostream&, Database& db)
 {
 std::string name = getWord(in);
 if (db.erase(name) == 0) {
-    throw std::logic_error("don't know this note yet\n");
+    throw std::logic_error("don't know this note yet");
 }
 }
 
