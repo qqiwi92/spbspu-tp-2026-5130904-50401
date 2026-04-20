@@ -123,9 +123,11 @@ auto it = findNote(db, name);
 std::shared_ptr< Note > note = it->second;
 
 for (auto link : note->getLinks()) {
-    std::shared_ptr<Note> locked = link.lock();
+    if (auto locked = link.lock()) {
     out << locked->getId();
     out << "\n";
+
+    }
 }
 }
 
