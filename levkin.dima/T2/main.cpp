@@ -25,6 +25,7 @@ std::istream& operator>>(std::istream& is, DataStruct& p);
 std::istream& operator>>(std::istream& is, delimeter_t del);
 bool operator<(DataStruct lhs, DataStruct rhs);
 bool operator<(SignedLongLong lhs, SignedLongLong rhs);
+bool operator==(SignedLongLong lhs, SignedLongLong rhs);
 bool operator<(Ratio lhs, Ratio rhs);
 }
 
@@ -59,15 +60,31 @@ std::istream& levkin::operator>>(std::istream& is, DataStruct& p)
     return is;
   }
 
-  int x = 0, y = 0;
   using del_t = delimeter_t;
-
-  is >> del_t{'('} >> x >> del_t{';'} >> y >> del_t{')'};
+  SignedLongLong key1;
+  Ratio key2;
+  std::string key3;
+  is >> del_t{'('} >> key1 >> del_t{';'} >> key2 >> del_t{';'} >> key3 >>
+      del_t{')'};
 
   if (is) {
     p = DataStruct{x, y};
   }
   return is;
+}
+
+bool levkin::operator<(SignedLongLong lhs, SignedLongLong rhs)
+{
+  return lhs.val < rhs.val;
+}
+
+bool levkin::operator<(Ratio lhs, Ratio rhs)
+{
+  return (lhs.first * rhs.second) < (rhs.first * lhs.second);
+}
+bool levkin::operator==(SignedLongLong lhs, SignedLongLong rhs)
+{
+  return lhs.val == rhs.val;
 }
 
 bool levkin::operator<(DataStruct lhs, DataStruct rhs)
