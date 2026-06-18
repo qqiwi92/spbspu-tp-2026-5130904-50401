@@ -4,9 +4,13 @@
 #include <algorithm>
 
 namespace levkin {
+using Ratio = std::pair< long long, unsigned long long >;
+struct SignedLongLong {
+  long long val;
+};
 struct DataStruct {
-  long long key1;
-  std::pair< long long, unsigned long long > key2;
+  SignedLongLong key1;
+  Ratio key2;
   std::string key3;
 };
 
@@ -14,10 +18,14 @@ struct delimeter_t {
   char expected;
 };
 
-std::ostream& operator<<(std::ostream& os, DataStruct p);
+std::ostream& operator<<(std::ostream& os, DataStruct& p);
+std::ostream& operator<<(std::ostream& os, SignedLongLong& p);
+std::ostream& operator<<(std::ostream& os, Ratio& p);
 std::istream& operator>>(std::istream& is, DataStruct& p);
 std::istream& operator>>(std::istream& is, delimeter_t del);
 bool operator<(DataStruct lhs, DataStruct rhs);
+bool operator<(SignedLongLong lhs, SignedLongLong rhs);
+bool operator<(Ratio lhs, Ratio rhs);
 }
 
 std::istream& check(std::istream& is, char ch)
@@ -34,13 +42,14 @@ std::istream& levkin::operator>>(std::istream& is, delimeter_t del)
   return check(is, del.expected);
 }
 
-std::ostream& levkin::operator<<(std::ostream& os, levkin::DataStruct p)
+std::ostream& levkin::operator<<(std::ostream& os, levkin::DataStruct& p)
 {
   std::ostream::sentry s(os);
   if (!s) {
     return os;
   }
-  return os << '(' << p.x << "; " << p.y << ')';
+  return os << "(:" << p.key1 << ":" << p.key2 << ":" << '"' << p.key3 << '"'
+            << ":)";
 }
 
 std::istream& levkin::operator>>(std::istream& is, DataStruct& p)
