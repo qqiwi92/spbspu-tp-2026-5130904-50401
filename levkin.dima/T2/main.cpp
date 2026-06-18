@@ -1,7 +1,9 @@
 #include <vector>
 #include <iostream>
-#include <iterator>
+#include <vector>
+#include <string>
 #include <algorithm>
+#include <iterator>
 #include <iomanip>
 #include <cctype>
 
@@ -15,32 +17,42 @@ struct SignedLongLong {
   long long val;
 };
 struct DataStruct {
-  SignedLongLong key1;
+  unsigned long long key1;
   Ratio key2;
   std::string key3;
 };
 
-struct delimeter_t {
-  char expected;
+struct DelimiterIO {
+  char exp;
 };
 
-struct delimeter_span_t {
-  std::string expected;
+struct LabelIO {
+  std::string exp;
 };
 
-std::ostream& operator<<(std::ostream& os, DataStruct& p);
-std::ostream& operator<<(std::ostream& os, SignedLongLong& p);
-std::ostream& operator<<(std::ostream& os, Ratio& p);
-std::istream& operator>>(std::istream& is, DataStruct& p);
-std::istream& operator>>(std::istream& is, SignedLongLong& p);
-std::istream& operator>>(std::istream& is, Ratio& p);
-std::istream& operator>>(std::istream& is, std::string& p);
-std::istream& operator>>(std::istream& is, delimeter_t del);
-std::istream& operator>>(std::istream& is, delimeter_span_t del);
-bool operator<(DataStruct lhs, DataStruct rhs);
-bool operator<(SignedLongLong lhs, SignedLongLong rhs);
-bool operator==(SignedLongLong lhs, SignedLongLong rhs);
-bool operator<(Ratio lhs, Ratio rhs);
+struct UllLitIO {
+  unsigned long long& ref;
+};
+
+struct RatLspIO {
+  Ratio& ref;
+};
+
+struct StringIO {
+  std::string& ref;
+};
+
+std::istream& operator>>(std::istream& in, DelimiterIO&& dest)
+{
+  std::istream::sentry sentry(in);
+  if (!sentry)
+    return in;
+  char c = ' ';
+  in >> c;
+  if (in && c != dest.exp) {
+    in.setstate(std::ios::failbit);
+  }
+  return in;
 }
 
 std::istream& check(std::istream& is, char ch)
