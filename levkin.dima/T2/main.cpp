@@ -2,9 +2,15 @@
 #include <iostream>
 #include <iterator>
 #include <algorithm>
+#include <iomanip>
+#include <cctype>
 
 namespace levkin {
+struct delimeter_t;
+struct delimeter_span_t;
 using Ratio = std::pair< long long, unsigned long long >;
+using del_t = delimeter_t;
+using del_span_t = delimeter_span_t;
 struct SignedLongLong {
   long long val;
 };
@@ -18,11 +24,19 @@ struct delimeter_t {
   char expected;
 };
 
+struct delimeter_span_t {
+  std::string expected;
+};
+
 std::ostream& operator<<(std::ostream& os, DataStruct& p);
 std::ostream& operator<<(std::ostream& os, SignedLongLong& p);
 std::ostream& operator<<(std::ostream& os, Ratio& p);
 std::istream& operator>>(std::istream& is, DataStruct& p);
+std::istream& operator>>(std::istream& is, SignedLongLong& p);
+std::istream& operator>>(std::istream& is, Ratio& p);
+std::istream& operator>>(std::istream& is, std::string& p);
 std::istream& operator>>(std::istream& is, delimeter_t del);
+std::istream& operator>>(std::istream& is, delimeter_span_t del);
 bool operator<(DataStruct lhs, DataStruct rhs);
 bool operator<(SignedLongLong lhs, SignedLongLong rhs);
 bool operator==(SignedLongLong lhs, SignedLongLong rhs);
@@ -31,9 +45,37 @@ bool operator<(Ratio lhs, Ratio rhs);
 
 std::istream& check(std::istream& is, char ch)
 {
-  char c = 0;
-  if (is >> c && c != ch) {
-    is.setstate(std::ios_base::failbit);
+  std::istream::sentry s(is);
+  if (s) {
+    if (is.peek() != ch) {
+      is.setstate(std::ios_base::failbit);
+    } else {
+      is.get();
+    }
+  }
+  return is;
+}
+
+std::istream& checkIgnoreCase(std::istream& is, char ch)
+{
+  std::istream::sentry s(is);
+  if (s) {
+    auto lowerC = std::tolower(static_cast< unsigned char >(is.peek()));
+    auto lowerCh = std::tolower(static_cast< unsigned char >(ch));
+
+    if (lowerC != lowerCh) {
+      is.setstate(std::ios_base::failbit);
+    } else {
+      is.get();
+    }
+  }
+  return is;
+}
+
+std::istream& checkSpan(std::istream& is, std::string& str)
+{
+  for (char c : str) {
+    checkIgnoreCase(is, c);
   }
   return is;
 }
@@ -41,6 +83,11 @@ std::istream& check(std::istream& is, char ch)
 std::istream& levkin::operator>>(std::istream& is, delimeter_t del)
 {
   return check(is, del.expected);
+}
+
+std::istream& levkin::operator>>(std::istream& is, del_span_t del)
+{
+  return checkSpan(is, del.expected);
 }
 
 std::ostream& levkin::operator<<(std::ostream& os, levkin::DataStruct& p)
@@ -52,7 +99,16 @@ std::ostream& levkin::operator<<(std::ostream& os, levkin::DataStruct& p)
   return os << "(:" << p.key1 << ":" << p.key2 << ":" << '"' << p.key3 << '"'
             << ":)";
 }
-
+std::istream& levkin::operator>>(std::istream& is, SignedLongLong& p)
+{
+  std::istream::sentry s(is);
+  if (!s) {
+    return is;
+  }
+  SignedLongLong key;
+  is >> key >> del_span_t{"ull"};
+  return is;
+}
 std::istream& levkin::operator>>(std::istream& is, DataStruct& p)
 {
   std::istream::sentry s(is);
@@ -60,7 +116,6 @@ std::istream& levkin::operator>>(std::istream& is, DataStruct& p)
     return is;
   }
 
-  using del_t = delimeter_t;
   SignedLongLong key1;
   Ratio key2;
   std::string key3;
@@ -68,7 +123,7 @@ std::istream& levkin::operator>>(std::istream& is, DataStruct& p)
       del_t{')'};
 
   if (is) {
-    p = DataStruct{x, y};
+    p = DataStruct{key1, key2, key3};
   }
   return is;
 }
@@ -107,8 +162,6 @@ int main()
   using oit_t = std::ostream_iterator< DataStruct >;
 
   std::copy(iit_t{std::cin}, iit_t{}, std::back_inserter(data));
-
   std::sort(data.begin(), data.end());
-
   std::copy(data.begin(), data.end(), oit_t{std::cout, "\n"});
 }
