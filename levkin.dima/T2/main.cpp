@@ -7,13 +7,24 @@
 
 namespace levkin {
 using Ratio = std::pair< long long, unsigned long long >;
+class IOguard
+{
+public:
+  explicit IOguard(std::basic_ios< char >& s);
+  ~IOguard();
 
+private:
+  std::basic_ios< char >& s_;
+  std::streamsize width_;
+  char fill_;
+  std::streamsize precision_;
+  std::basic_ios< char >::fmtflags fmt_;
+};
 struct DataStruct {
   unsigned long long key1;
   Ratio key2;
   std::string key3;
 };
-
 struct DelimiterIO {
   char exp;
 };
@@ -105,6 +116,7 @@ std::istream& operator>>(std::istream& in, DataStruct& dest)
 
 std::ostream& operator<<(std::ostream& out, const DataStruct& src)
 {
+  IOguard guard(out);
   out << "(:key1 " << src.key1 << "ull:key2 (:N " << src.key2.first << ":D "
       << src.key2.second << ":):key3 \"" << src.key3 << "\":)";
   return out;
@@ -120,8 +132,20 @@ bool compareDataStruct(const DataStruct& a, const DataStruct& b)
     return val1 < val2;
   return a.key3.length() < b.key3.length();
 }
+IOguard::IOguard(std::basic_ios< char >& s)
+    : s_(s), width_(s.width()), fill_(s.fill()), precision_(s.precision()),
+      fmt_(s.flags())
+{
 }
 
+IOguard::~IOguard()
+{
+  s_.width(width_);
+  s_.fill(fill_);
+  s_.precision(precision_);
+  s_.flags(fmt_);
+}
+}
 int main()
 {
   using namespace levkin;
