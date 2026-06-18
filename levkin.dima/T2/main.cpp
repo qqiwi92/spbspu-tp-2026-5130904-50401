@@ -1,21 +1,13 @@
-#include <vector>
 #include <iostream>
 #include <vector>
 #include <string>
 #include <algorithm>
 #include <iterator>
 #include <iomanip>
-#include <cctype>
 
 namespace levkin {
-struct delimeter_t;
-struct delimeter_span_t;
 using Ratio = std::pair< long long, unsigned long long >;
-using del_t = delimeter_t;
-using del_span_t = delimeter_span_t;
-struct SignedLongLong {
-  long long val;
-};
+
 struct DataStruct {
   unsigned long long key1;
   Ratio key2;
@@ -130,8 +122,6 @@ std::istream& operator>>(std::istream& in, DataStruct& dest)
       in >> DelimiterIO{':'};
     }
   }
-  return is;
-}
 
   in >> DelimiterIO{':'} >> DelimiterIO{')'};
   if (in) {
@@ -140,88 +130,46 @@ std::istream& operator>>(std::istream& in, DataStruct& dest)
   return in;
 }
 
-std::istream& levkin::operator>>(std::istream& is, delimeter_t del)
+std::ostream& operator<<(std::ostream& out, const DataStruct& src)
 {
-  return check(is, del.expected);
+  std::ostream::sentry sentry(out);
+  if (!sentry)
+    return out;
+  out << "(:key1 " << src.key1 << "ull";
+  out << ":key2 (:N " << src.key2.first << ":D " << src.key2.second << ":)";
+  out << ":key3 \"" << src.key3 << "\":)";
+  return out;
 }
 
-std::istream& levkin::operator>>(std::istream& is, del_span_t del)
+bool compareDataStruct(const DataStruct& a, const DataStruct& b)
 {
-  return checkSpan(is, del.expected);
+  if (a.key1 != b.key1)
+    return a.key1 < b.key1;
+  if (a.key2 != b.key2)
+    return a.key2 < b.key2;
+  return a.key3.length() < b.key3.length();
 }
-
-std::ostream& levkin::operator<<(std::ostream& os, levkin::DataStruct& p)
-{
-  std::ostream::sentry s(os);
-  if (!s) {
-    return os;
-  }
-  return os << "(:" << p.key1 << ":" << p.key2 << ":" << '"' << p.key3 << '"'
-            << ":)";
-}
-std::istream& levkin::operator>>(std::istream& is, SignedLongLong& p)
-{
-  std::istream::sentry s(is);
-  if (!s) {
-    return is;
-  }
-  SignedLongLong key;
-  is >> key >> del_span_t{"ull"};
-  return is;
-}
-std::istream& levkin::operator>>(std::istream& is, DataStruct& p)
-{
-  std::istream::sentry s(is);
-  if (!s) {
-    return is;
-  }
-
-  SignedLongLong key1;
-  Ratio key2;
-  std::string key3;
-  is >> del_t{'('} >> key1 >> del_t{';'} >> key2 >> del_t{';'} >> key3 >>
-      del_t{')'};
-
-  if (is) {
-    p = DataStruct{key1, key2, key3};
-  }
-  return is;
-}
-
-bool levkin::operator<(SignedLongLong lhs, SignedLongLong rhs)
-{
-  return lhs.val < rhs.val;
-}
-
-bool levkin::operator<(Ratio lhs, Ratio rhs)
-{
-  return (lhs.first * rhs.second) < (rhs.first * lhs.second);
-}
-bool levkin::operator==(SignedLongLong lhs, SignedLongLong rhs)
-{
-  return lhs.val == rhs.val;
-}
-
-bool levkin::operator<(DataStruct lhs, DataStruct rhs)
-{
-  if (lhs.key1 != rhs.key1) {
-    return lhs.key1 < rhs.key1;
-  }
-  if (lhs.key2 != rhs.key2) {
-    return lhs.key2 < rhs.key2;
-  }
-  return lhs.key3.size() < rhs.key3.size();
 }
 
 int main()
 {
-  using levkin::DataStruct;
+  using namespace levkin;
   std::vector< DataStruct > data;
 
-  using iit_t = std::istream_iterator< DataStruct >;
-  using oit_t = std::ostream_iterator< DataStruct >;
+  std::copy(
+      std::istream_iterator< DataStruct >(std::cin),
+      std::istream_iterator< DataStruct >(), std::back_inserter(data));
 
-  std::copy(iit_t{std::cin}, iit_t{}, std::back_inserter(data));
-  std::sort(data.begin(), data.end());
-  std::copy(data.begin(), data.end(), oit_t{std::cout, "\n"});
+  if (std::cin.fail() && !std::cin.eof()) {
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits< std::streamsize >::max(), '\n');
+  }
+
+  std::sort(data.begin(), data.end(), compareDataStruct);
+
+  std::copy(
+      data.begin(), data.end(),
+      std::ostream_iterator< DataStruct >(std::cout, "\n"));
+
+  return 0;
 }
