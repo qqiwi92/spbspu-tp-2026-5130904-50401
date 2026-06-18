@@ -4,18 +4,20 @@
 #include <algorithm>
 
 namespace levkin {
-struct p_t {
-  int x, y;
+struct DataStruct {
+  long long key1;
+  std::pair< long long, unsigned long long > key2;
+  std::string key3;
 };
 
 struct delimeter_t {
   char expected;
 };
 
-std::ostream& operator<<(std::ostream& os, p_t p);
-std::istream& operator>>(std::istream& is, p_t& p);
+std::ostream& operator<<(std::ostream& os, DataStruct p);
+std::istream& operator>>(std::istream& is, DataStruct& p);
 std::istream& operator>>(std::istream& is, delimeter_t del);
-bool operator<(p_t lhs, p_t rhs);
+bool operator<(DataStruct lhs, DataStruct rhs);
 }
 
 std::istream& check(std::istream& is, char ch)
@@ -32,7 +34,7 @@ std::istream& levkin::operator>>(std::istream& is, delimeter_t del)
   return check(is, del.expected);
 }
 
-std::ostream& levkin::operator<<(std::ostream& os, levkin::p_t p)
+std::ostream& levkin::operator<<(std::ostream& os, levkin::DataStruct p)
 {
   std::ostream::sentry s(os);
   if (!s) {
@@ -41,7 +43,7 @@ std::ostream& levkin::operator<<(std::ostream& os, levkin::p_t p)
   return os << '(' << p.x << "; " << p.y << ')';
 }
 
-std::istream& levkin::operator>>(std::istream& is, p_t& p)
+std::istream& levkin::operator>>(std::istream& is, DataStruct& p)
 {
   std::istream::sentry s(is);
   if (!s) {
@@ -54,26 +56,29 @@ std::istream& levkin::operator>>(std::istream& is, p_t& p)
   is >> del_t{'('} >> x >> del_t{';'} >> y >> del_t{')'};
 
   if (is) {
-    p = p_t{x, y};
+    p = DataStruct{x, y};
   }
   return is;
 }
 
-bool levkin::operator<(p_t lhs, p_t rhs)
+bool levkin::operator<(DataStruct lhs, DataStruct rhs)
 {
-  if (lhs.x != rhs.x) {
-    return lhs.x < rhs.x;
+  if (lhs.key1 != rhs.key1) {
+    return lhs.key1 < rhs.key1;
   }
-  return lhs.y < rhs.y;
+  if (lhs.key2 != rhs.key2) {
+    return lhs.key2 < rhs.key2;
+  }
+  return lhs.key3.size() < rhs.key3.size();
 }
 
 int main()
 {
-  using T = levkin::p_t;
-  std::vector< T > data;
+  using levkin::DataStruct;
+  std::vector< DataStruct > data;
 
-  using iit_t = std::istream_iterator< T >;
-  using oit_t = std::ostream_iterator< T >;
+  using iit_t = std::istream_iterator< DataStruct >;
+  using oit_t = std::ostream_iterator< DataStruct >;
 
   std::copy(iit_t{std::cin}, iit_t{}, std::back_inserter(data));
 
