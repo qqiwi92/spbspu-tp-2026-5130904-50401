@@ -3,6 +3,16 @@
 #include <iterator>
 #include <algorithm>
 
+namespace levkin {
+    struct p_t {
+        int x,y;
+    };
+    std::ostream & operator<<(std::ostream& os, p_t p);
+    std::istream & operator>>(std::istream& is, p_t p);
+
+    bool operator<(p_t lhs, p_t rhs);
+}
+
 int main()
 {
   std::vector< int > data;
