@@ -3,9 +3,16 @@
 #include <iterator>
 #include <algorithm>
 #include <numeric>
-#include <functional> 
+#include <functional>
 
 namespace levkin {
+void getPolygons(std::istream& input, std::vector< Polygon >& polygons)
+{
+  Polygon p;
+  while (input >> p) {
+    polygons.push_back(p);
+  }
+}
 bool operator==(const Point& lhs, const Point& rhs)
 {
   return lhs.x == rhs.x && lhs.y == rhs.y;
@@ -58,7 +65,48 @@ std::istream& operator>>(std::istream& input, Polygon& v)
   return input;
 }
 
+bool checkPolygonIntersection(const Polygon& lhs, const Polygon& rhs)
+{
+  std::vector< size_t > indices(lhs.points.size());
+  std::iota(indices.begin(), indices.end(), 0);
+
+  using namespace std::placeholders;
+  return std::any_of(
+      indices.begin(), indices.end(),
+      std::bind(
+          detail::isSegmentIntersectPolygon,
+          std::bind(detail::getSegment, std::cref(lhs), _1), std::cref(rhs)));
+}
+bool isCross(int min1, int max1, int min2, int max2)
+{
+  return std::max(min1, min2) <= std::min(max1, max2);
+}
+bool isIntersect(const Segment& s1, const Segment& s2)
+{
+  using namespace detail;
+  return isCross(
+             std::min(s1.p1.x, s1.p2.x), std::max(s1.p1.x, s1.p2.x),
+             std::min(s2.p1.x, s2.p2.x), std::max(s2.p1.x, s2.p2.x)) &&
+         isCross(
+             std::min(s1.p1.y, s1.p2.y), std::max(s1.p1.y, s1.p2.y),
+             std::min(s2.p1.y, s2.p2.y), std::max(s2.p1.y, s2.p2.y)) &&
+         areaSign(s1.p1, s1.p2, s2.p1) * areaSign(s1.p1, s1.p2, s2.p2) <= 0 &&
+         areaSign(s2.p1, s2.p2, s1.p1) * areaSign(s2.p1, s2.p2, s1.p2) <= 0;
+}
 namespace detail {
+std::istream& operator>>(std::istream& input, DelimiterIO&& dest)
+{
+  std::istream::sentry sentry(input);
+  if (!sentry) {
+    return input;
+  }
+  char c = 0;
+  input >> c;
+  if (c != dest.val) {
+    input.setstate(std::ios::failbit);
+  }
+  return input;
+}
 Segment getSegment(const Polygon& poly, size_t i)
 {
   size_t n = poly.points.size();
@@ -76,23 +124,6 @@ bool isSegmentIntersectPolygon(const Segment& seg, const Polygon& poly)
       std::bind(isIntersect, seg, std::bind(getSegment, std::cref(poly), _1)));
 }
 
-bool checkPolygonIntersection(const Polygon& lhs, const Polygon& rhs)
-{
-  std::vector< size_t > indices(lhs.points.size());
-  std::iota(indices.begin(), indices.end(), 0);
-
-  using namespace std::placeholders;
-  return std::any_of(
-      indices.begin(), indices.end(),
-      std::bind(
-          isSegmentIntersectPolygon, std::bind(getSegment, std::cref(lhs), _1),
-          std::cref(rhs)));
-}
-bool isCross(int min1, int max1, int min2, int max2)
-{
-  return std::max(min1, min2) <= std::min(max1, max2);
-}
-
 int areaSign(const Point& a, const Point& b, const Point& c)
 {
   long long area = static_cast< long long >(b.x - a.x) * (c.y - a.y) -
@@ -102,17 +133,6 @@ int areaSign(const Point& a, const Point& b, const Point& c)
   return (area > 0) ? 1 : -1;
 }
 
-bool isIntersect(const Segment& s1, const Segment& s2)
-{
-  return isCross(
-             std::min(s1.p1.x, s1.p2.x), std::max(s1.p1.x, s1.p2.x),
-             std::min(s2.p1.x, s2.p2.x), std::max(s2.p1.x, s2.p2.x)) &&
-         isCross(
-             std::min(s1.p1.y, s1.p2.y), std::max(s1.p1.y, s1.p2.y),
-             std::min(s2.p1.y, s2.p2.y), std::max(s2.p1.y, s2.p2.y)) &&
-         areaSign(s1.p1, s1.p2, s2.p1) * areaSign(s1.p1, s1.p2, s2.p2) <= 0 &&
-         areaSign(s2.p1, s2.p2, s1.p1) * areaSign(s2.p1, s2.p2, s1.p2) <= 0;
-}
 bool compareAreaLess(const Polygon& a, const Polygon& b)
 {
   return areaOfPolygon(a) < areaOfPolygon(b);
@@ -158,7 +178,6 @@ IOguard::~IOguard()
   s_.precision(precision_);
   s_.flags(fmt_);
 }
-}
 
 double areaOfTriangle(Polygon& polygon)
 {
@@ -200,7 +219,7 @@ double areaOfPolygon(const Polygon& polygon)
       std::accumulate(triangleAreas.begin(), triangleAreas.end(), 0.0);
   return std::abs(totalArea);
 }
-double polygonVectorAreaSum(std::vector< Polygon > v)
+double polygonVectorAreaSum(const std::vector< Polygon > v)
 {
   std::vector< double > areas;
   std::transform(v.begin(), v.end(), std::back_inserter(areas), areaOfPolygon);
@@ -208,4 +227,5 @@ double polygonVectorAreaSum(std::vector< Polygon > v)
   return result;
 }
 
+}
 }

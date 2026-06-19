@@ -6,7 +6,6 @@
 #include <vector>
 #include <functional>
 #include <algorithm>
-#include <numeric>
 
 namespace levkin {
 
@@ -179,7 +178,8 @@ void cmdMaxSeq(
   out << maxLen << "\n";
 }
 
-void cmdIntersections(std::istream& in, std::ostream& out, const std::vector< Polygon >& db)
+void cmdIntersections(
+    std::istream& in, std::ostream& out, const std::vector< Polygon >& db)
 {
   Polygon target;
   if (!(in >> target) || !detail::isEndOfLine(in)) {
@@ -188,8 +188,9 @@ void cmdIntersections(std::istream& in, std::ostream& out, const std::vector< Po
   }
 
   using namespace std::placeholders;
-  ptrdiff_t count = std::count_if(db.begin(), db.end(),
-                                  std::bind(checkPolygonIntersection, _1, std::cref(target)));
+  ptrdiff_t count = std::count_if(
+      db.begin(), db.end(),
+      std::bind(checkPolygonIntersection, _1, std::cref(target)));
 
   detail::IOguard guard(out);
   out << count << "\n";

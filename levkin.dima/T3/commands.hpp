@@ -8,7 +8,6 @@
 #include <functional>
 #include "polygon.hpp"
 namespace levkin {
-class Note;
 
 using Database = const std::vector< Polygon >;
 using cmd_t = std::function< void(std::istream&, std::ostream&, Database&) >;

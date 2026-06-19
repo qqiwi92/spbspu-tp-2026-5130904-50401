@@ -2,7 +2,7 @@
 #define POLYGON
 #include <vector>
 #include <iostream>
-
+#include <algorithm>
 namespace levkin {
 struct Point {
   int x, y;
@@ -14,16 +14,18 @@ struct Polygon {
 struct Segment {
   Point p1, p2;
 };
-bool isCross(int min1, int max1, int min2, int max2);
-bool isIntersect(const Segment& s1, const Segment& s2);
-bool checkPolygonIntersection(const Polygon& lhs, const Polygon& rhs);
 void getPolygons(std::istream& input, std::vector< Polygon >& polygons);
 std::istream& operator>>(std::istream& os, Point& p);
 std::istream& operator>>(std::istream& os, Polygon& p);
 bool operator==(const Point& lhs, const Point& rhs);
 bool operator==(const Polygon& lhs, const Polygon& rhs);
 
+bool isCross(int min1, int max1, int min2, int max2);
+bool isIntersect(const Segment& s1, const Segment& s2);
+bool checkPolygonIntersection(const Polygon& lhs, const Polygon& rhs);
 namespace detail {
+Segment getSegment(const Polygon& poly, size_t i);
+bool isSegmentIntersectPolygon(const Segment& seg, const Polygon& poly);
 int areaSign(const Point& a, const Point& b, const Point& c);
 bool compareAreaLess(const Polygon& a, const Polygon& b);
 bool compareVertexesLess(const Polygon& a, const Polygon& b);
