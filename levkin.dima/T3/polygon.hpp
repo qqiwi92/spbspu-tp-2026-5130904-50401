@@ -17,9 +17,15 @@ std::istream& operator>>(std::istream& os, Point& p);
 std::istream& operator>>(std::istream& os, Polygon& p);
 
 namespace detail {
-double areaOfTriangle(Polygon& p);
-double areaOfPolygon(Polygon & p);
-
+bool compareAreaLess(const Polygon& a, const Polygon& b);
+bool compareVertexesLess(const Polygon& a, const Polygon& b);
+double areaOfTriangle(const Polygon& p);
+double areaOfPolygon(const Polygon& p);
+double polygonVectorAreaSum(const std::vector< Polygon > v);
+size_t getPolygonSize(const Polygon& poly);
+bool isEven(size_t n);
+bool isOdd(size_t n);
+bool isSizeEqual(size_t n, size_t target);
 struct DelimiterIO {
   char val;
 };
