@@ -22,6 +22,8 @@ struct DelimiterIO {
 };
 
 std::istream& operator>>(std::istream& input, DelimiterIO&& dest);
+bool isEndOfLine(std::istream& input);
+void skipSpaces(std::istream& input);
 }
 }
 
