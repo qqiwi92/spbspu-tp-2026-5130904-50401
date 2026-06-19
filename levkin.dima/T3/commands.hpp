@@ -20,6 +20,8 @@ void cmdMin(std::istream &, std::ostream &, Database &);
 void cmdCount(std::istream &, std::ostream &, Database &);
 void cmdMaxSeq(std::istream &, std::ostream &, Database &);
 void cmdIntersections(std::istream &, std::ostream &, Database &);
+std::string getWord(std::istream& in);
+
 Cmds getCmds();
 }
 
