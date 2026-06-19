@@ -8,15 +8,16 @@
 namespace levkin {
 void getPolygons(std::istream& input, std::vector< Polygon >& polygons)
 {
-  std::string line;
-  while (std::getline(input, line)) {
-    if (line.empty()) {
-      continue;
-    }
-    std::stringstream ss(line);
-    Polygon p;
-    if (ss >> p) {
+  Polygon p;
+  while (!input.eof()) {
+    if (input >> p) {
       polygons.push_back(p);
+    } else {
+      if (input.eof()) {
+        break;
+      }
+      input.clear();
+      input.ignore(1);
     }
   }
 }

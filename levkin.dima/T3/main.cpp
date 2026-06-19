@@ -21,24 +21,16 @@ int main(int argc, char** argv)
   std::string current;
   using namespace levkin;
   Cmds cmds = getCmds();
-  Database db;
 
   while (std::cin >> current) {
-    try {
-      if (cmds.find(current) == cmds.end()) {
-        throw std::logic_error("Unknown command");
-      }
-      cmds.at(current)(std::cin, std::cout, polygons);
-    } catch (const std::exception& e) {
+    if (cmds.find(current) == cmds.end()) {
       std::cout << "<INVALID COMMAND>\n";
       std::string dummy;
       std::getline(std::cin, dummy);
+    } else {
+      cmds.at(current)(std::cin, std::cout, polygons);
     }
   }
 
-  if (!std::cin.eof() && std::cin.fail()) {
-    std::cerr << "Bad input\n";
-    return 1;
-  }
   return 0;
 }

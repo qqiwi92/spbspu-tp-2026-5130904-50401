@@ -140,6 +140,10 @@ void cmdCount(
   } else {
     try {
       size_t targetSize = std::stoull(word);
+      if (targetSize < 3) {
+        out << "<INVALID COMMAND>\n";
+        return;
+      }
       count = std::count_if(
           db.begin(), db.end(), makeSizeEqualPredicate(targetSize));
     } catch (...) {
@@ -151,11 +155,15 @@ void cmdCount(
   detail::IOguard guard(out);
   out << count << "\n";
 }
+
 void cmdMaxSeq(
     std::istream& in, std::ostream& out, const std::vector< Polygon >& db)
 {
   Polygon target;
   if (!(in >> target) || !detail::isEndOfLine(in)) {
+    in.clear();
+    std::string dummy;
+    std::getline(in, dummy);
     out << "<INVALID COMMAND>\n";
     return;
   }
@@ -187,6 +195,9 @@ void cmdIntersections(
 {
   Polygon target;
   if (!(in >> target) || !detail::isEndOfLine(in)) {
+    in.clear();
+    std::string dummy;
+    std::getline(in, dummy);
     out << "<INVALID COMMAND>\n";
     return;
   }
@@ -199,6 +210,7 @@ void cmdIntersections(
   detail::IOguard guard(out);
   out << count << "\n";
 }
+
 Cmds getCmds()
 {
   Cmds cmds;
