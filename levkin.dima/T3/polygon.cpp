@@ -1,9 +1,9 @@
 #include "polygon.hpp"
-
 #include <algorithm>
 #include <iterator>
 #include <algorithm>
 #include <numeric>
+#include <functional> 
 
 namespace levkin {
 bool operator==(const Point& lhs, const Point& rhs)
@@ -59,6 +59,35 @@ std::istream& operator>>(std::istream& input, Polygon& v)
 }
 
 namespace detail {
+Segment getSegment(const Polygon& poly, size_t i)
+{
+  size_t n = poly.points.size();
+  return Segment{poly.points[i], poly.points[(i + 1) % n]};
+}
+
+bool isSegmentIntersectPolygon(const Segment& seg, const Polygon& poly)
+{
+  std::vector< size_t > indices(poly.points.size());
+  std::iota(indices.begin(), indices.end(), 0);
+
+  using namespace std::placeholders;
+  return std::any_of(
+      indices.begin(), indices.end(),
+      std::bind(isIntersect, seg, std::bind(getSegment, std::cref(poly), _1)));
+}
+
+bool checkPolygonIntersection(const Polygon& lhs, const Polygon& rhs)
+{
+  std::vector< size_t > indices(lhs.points.size());
+  std::iota(indices.begin(), indices.end(), 0);
+
+  using namespace std::placeholders;
+  return std::any_of(
+      indices.begin(), indices.end(),
+      std::bind(
+          isSegmentIntersectPolygon, std::bind(getSegment, std::cref(lhs), _1),
+          std::cref(rhs)));
+}
 bool isCross(int min1, int max1, int min2, int max2)
 {
   return std::max(min1, min2) <= std::min(max1, max2);

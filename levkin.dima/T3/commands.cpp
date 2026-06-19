@@ -178,6 +178,22 @@ void cmdMaxSeq(
   detail::IOguard guard(out);
   out << maxLen << "\n";
 }
+
+void cmdIntersections(std::istream& in, std::ostream& out, const std::vector< Polygon >& db)
+{
+  Polygon target;
+  if (!(in >> target) || !detail::isEndOfLine(in)) {
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
+
+  using namespace std::placeholders;
+  ptrdiff_t count = std::count_if(db.begin(), db.end(),
+                                  std::bind(checkPolygonIntersection, _1, std::cref(target)));
+
+  detail::IOguard guard(out);
+  out << count << "\n";
+}
 Cmds getCmds()
 {
   Cmds cmds;
