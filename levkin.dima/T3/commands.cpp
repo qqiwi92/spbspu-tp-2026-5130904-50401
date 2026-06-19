@@ -148,7 +148,36 @@ void cmdCount(
   detail::IOguard guard(out);
   out << count << "\n";
 }
+void cmdMaxSeq(
+    std::istream& in, std::ostream& out, const std::vector< Polygon >& db)
+{
+  Polygon target;
+  if (!(in >> target) || !detail::isEndOfLine(in)) {
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
 
+  if (db.empty()) {
+    detail::IOguard guard(out);
+    out << 0 << "\n";
+    return;
+  }
+
+  std::vector< bool > matches;
+  matches.reserve(db.size());
+
+  using namespace std::placeholders;
+  std::transform(
+      db.begin(), db.end(), std::back_inserter(matches),
+      std::bind(
+          static_cast< bool (*)(const Polygon&, const Polygon&) >(operator==),
+          _1, target));
+
+  size_t maxLen = detail::maxSequenceOfTrue(matches.begin(), matches.end());
+
+  detail::IOguard guard(out);
+  out << maxLen << "\n";
+}
 Cmds getCmds()
 {
   Cmds cmds;
