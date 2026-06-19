@@ -1,18 +1,26 @@
 #include "polygon.hpp"
 #include <algorithm>
 #include <iterator>
-#include <algorithm>
 #include <numeric>
 #include <functional>
+#include <sstream>
 
 namespace levkin {
 void getPolygons(std::istream& input, std::vector< Polygon >& polygons)
 {
-  Polygon p;
-  while (input >> p) {
-    polygons.push_back(p);
+  std::string line;
+  while (std::getline(input, line)) {
+    if (line.empty()) {
+      continue;
+    }
+    std::stringstream ss(line);
+    Polygon p;
+    if (ss >> p) {
+      polygons.push_back(p);
+    }
   }
 }
+
 bool operator==(const Point& lhs, const Point& rhs)
 {
   return lhs.x == rhs.x && lhs.y == rhs.y;
@@ -25,6 +33,7 @@ bool operator==(const Polygon& lhs, const Polygon& rhs)
   }
   return std::equal(lhs.points.begin(), lhs.points.end(), rhs.points.begin());
 }
+
 std::istream& operator>>(std::istream& input, Point& v)
 {
   std::istream::sentry sentry(input);
@@ -53,12 +62,14 @@ std::istream& operator>>(std::istream& input, Polygon& v)
   std::vector< Point > temp;
   temp.reserve(amount);
 
-  std::copy_n(
-      std::istream_iterator< Point >(input), amount, std::back_inserter(temp));
-
-  if (!input || temp.size() < amount) {
-    input.setstate(std::ios::failbit);
-    return input;
+  for (size_t i = 0; i < amount; ++i) {
+    Point p;
+    if (input >> p) {
+      temp.push_back(p);
+    } else {
+      input.setstate(std::ios::failbit);
+      return input;
+    }
   }
 
   v.points = std::move(temp);
@@ -77,10 +88,12 @@ bool checkPolygonIntersection(const Polygon& lhs, const Polygon& rhs)
           detail::isSegmentIntersectPolygon,
           std::bind(detail::getSegment, std::cref(lhs), _1), std::cref(rhs)));
 }
+
 bool isCross(int min1, int max1, int min2, int max2)
 {
   return std::max(min1, min2) <= std::min(max1, max2);
 }
+
 bool isIntersect(const Segment& s1, const Segment& s2)
 {
   using namespace detail;
@@ -90,10 +103,16 @@ bool isIntersect(const Segment& s1, const Segment& s2)
          isCross(
              std::min(s1.p1.y, s1.p2.y), std::max(s1.p1.y, s1.p2.y),
              std::min(s2.p1.y, s2.p2.y), std::max(s2.p1.y, s2.p2.y)) &&
-         areaSign(s1.p1, s1.p2, s2.p1) * areaSign(s1.p1, s1.p2, s2.p2) <= 0 &&
-         areaSign(s2.p1, s2.p2, s1.p1) * areaSign(s2.p1, s2.p2, s1.p2) <= 0;
+         detail::areaSign(s1.p1, s1.p2, s2.p1) *
+                 detail::areaSign(s1.p1, s1.p2, s2.p2) <=
+             0 &&
+         detail::areaSign(s2.p1, s2.p2, s1.p1) *
+                 detail::areaSign(s2.p1, s2.p2, s1.p2) <=
+             0;
 }
+
 namespace detail {
+
 std::istream& operator>>(std::istream& input, DelimiterIO&& dest)
 {
   std::istream::sentry sentry(input);
@@ -101,12 +120,12 @@ std::istream& operator>>(std::istream& input, DelimiterIO&& dest)
     return input;
   }
   char c = 0;
-  input >> c;
-  if (c != dest.val) {
+  if (!(input >> c) || c != dest.val) {
     input.setstate(std::ios::failbit);
   }
   return input;
 }
+
 Segment getSegment(const Polygon& poly, size_t i)
 {
   size_t n = poly.points.size();
@@ -142,10 +161,12 @@ bool compareVertexesLess(const Polygon& a, const Polygon& b)
 {
   return detail::getPolygonSize(a) < detail::getPolygonSize(b);
 }
+
 size_t getPolygonSize(const Polygon& poly) { return poly.points.size(); }
 bool isEven(size_t n) { return n % 2 == 0; }
 bool isOdd(size_t n) { return n % 2 != 0; }
 bool isSizeEqual(size_t n, size_t target) { return n == target; }
+
 void skipSpaces(std::istream& is)
 {
   int ch = 0;
@@ -179,20 +200,6 @@ IOguard::~IOguard()
   s_.flags(fmt_);
 }
 
-double areaOfTriangle(Polygon& polygon)
-{
-  const std::vector< Point >& v = polygon.points;
-
-  if (v.size() < 3)
-    return 0.0;
-
-  double area =
-      (v[0].x * (v[1].y - v[2].y) + v[1].x * (v[2].y - v[0].y) +
-       v[2].x * (v[0].y - v[1].y));
-
-  return std::abs(area) / 2.0;
-}
-
 double areaOfTriangle(const Point& p0, const Point& p1, const Point& p2)
 {
   return 0.5 *
@@ -215,16 +222,18 @@ double areaOfPolygon(const Polygon& polygon)
   std::transform(
       indices.begin(), indices.end(), std::back_inserter(triangleAreas),
       [&v](size_t i) { return areaOfTriangle(v[0], v[i - 1], v[i]); });
+
   double totalArea =
       std::accumulate(triangleAreas.begin(), triangleAreas.end(), 0.0);
   return std::abs(totalArea);
 }
+
 double polygonVectorAreaSum(const std::vector< Polygon > v)
 {
   std::vector< double > areas;
+  areas.reserve(v.size());
   std::transform(v.begin(), v.end(), std::back_inserter(areas), areaOfPolygon);
-  double result = std::accumulate(areas.begin(), areas.end(), 0.0);
-  return result;
+  return std::accumulate(areas.begin(), areas.end(), 0.0);
 }
 
 }
