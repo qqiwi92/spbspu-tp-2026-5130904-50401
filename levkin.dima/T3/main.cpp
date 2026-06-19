@@ -28,7 +28,7 @@ int main(int argc, char** argv)
       if (cmds.find(current) == cmds.end()) {
         throw std::logic_error("Unknown command");
       }
-      cmds.at(current)(std::cin, std::cout, db);
+      cmds.at(current)(std::cin, std::cout, polygons);
     } catch (const std::exception& e) {
       std::cout << "<INVALID COMMAND>\n";
       std::string dummy;

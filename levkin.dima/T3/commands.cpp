@@ -57,6 +57,10 @@ void cmdArea(
   } else {
     try {
       size_t targetSize = std::stoull(word);
+      if (targetSize < 3) {
+        out << "<INVALID COMMAND>\n";
+        return;
+      }
       std::copy_if(
           db.begin(), db.end(), std::back_inserter(filtered),
           makeSizeEqualPredicate(targetSize));
