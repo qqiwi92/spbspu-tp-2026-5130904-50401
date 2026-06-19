@@ -59,7 +59,31 @@ std::istream& operator>>(std::istream& input, Polygon& v)
 }
 
 namespace detail {
-    
+bool isCross(int min1, int max1, int min2, int max2)
+{
+  return std::max(min1, min2) <= std::min(max1, max2);
+}
+
+int areaSign(const Point& a, const Point& b, const Point& c)
+{
+  long long area = static_cast< long long >(b.x - a.x) * (c.y - a.y) -
+                   static_cast< long long >(b.y - a.y) * (c.x - a.x);
+  if (area == 0)
+    return 0;
+  return (area > 0) ? 1 : -1;
+}
+
+bool isIntersect(const Segment& s1, const Segment& s2)
+{
+  return isCross(
+             std::min(s1.p1.x, s1.p2.x), std::max(s1.p1.x, s1.p2.x),
+             std::min(s2.p1.x, s2.p2.x), std::max(s2.p1.x, s2.p2.x)) &&
+         isCross(
+             std::min(s1.p1.y, s1.p2.y), std::max(s1.p1.y, s1.p2.y),
+             std::min(s2.p1.y, s2.p2.y), std::max(s2.p1.y, s2.p2.y)) &&
+         areaSign(s1.p1, s1.p2, s2.p1) * areaSign(s1.p1, s1.p2, s2.p2) <= 0 &&
+         areaSign(s2.p1, s2.p2, s1.p1) * areaSign(s2.p1, s2.p2, s1.p2) <= 0;
+}
 bool compareAreaLess(const Polygon& a, const Polygon& b)
 {
   return areaOfPolygon(a) < areaOfPolygon(b);
