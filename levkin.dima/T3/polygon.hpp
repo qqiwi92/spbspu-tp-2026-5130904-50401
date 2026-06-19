@@ -28,6 +28,8 @@ size_t getPolygonSize(const Polygon& poly);
 bool isEven(size_t n);
 bool isOdd(size_t n);
 bool isSizeEqual(size_t n, size_t target);
+template < typename InputIt >
+size_t maxSequenceOfTrue(InputIt first, InputIt last);
 struct DelimiterIO {
   char val;
 };
@@ -50,6 +52,31 @@ private:
   std::basic_ios< char >::fmtflags fmt_;
 };
 }
+}
+
+template < typename InputIt >
+size_t levkin::detail::maxSequenceOfTrue(InputIt first, InputIt last)
+{
+  size_t maxLen = 0;
+  auto it = first;
+
+  while (it != last) {
+    it = std::find(it, last, true);
+    if (it == last) {
+      break;
+    }
+
+    auto nextFalse = std::find(it, last, false);
+    size_t currentLen = std::distance(it, nextFalse);
+
+    if (currentLen > maxLen) {
+      maxLen = currentLen;
+    }
+
+    it = nextFalse;
+  }
+
+  return maxLen;
 }
 
 #endif

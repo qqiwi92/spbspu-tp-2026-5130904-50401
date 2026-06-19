@@ -59,6 +59,7 @@ std::istream& operator>>(std::istream& input, Polygon& v)
 }
 
 namespace detail {
+    
 bool compareAreaLess(const Polygon& a, const Polygon& b)
 {
   return areaOfPolygon(a) < areaOfPolygon(b);
