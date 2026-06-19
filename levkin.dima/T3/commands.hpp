@@ -14,8 +14,12 @@ using Database = const std::vector< Polygon >;
 using cmd_t = std::function< void(std::istream&, std::ostream&, Database&) >;
 using Cmds = std::unordered_map< std::string, cmd_t >;
 
-void note(std::istream& in, std::ostream& out, Database& db);
-
+void cmdArea(std::istream &, std::ostream &, Database &);
+void cmdMax(std::istream &, std::ostream &, Database &);
+void cmdMin(std::istream &, std::ostream &, Database &);
+void cmdCount(std::istream &, std::ostream &, Database &);
+void cmdMaxSeq(std::istream &, std::ostream &, Database &);
+void cmdIntersections(std::istream &, std::ostream &, Database &);
 Cmds getCmds();
 }
 

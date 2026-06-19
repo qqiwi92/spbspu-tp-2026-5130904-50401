@@ -24,6 +24,20 @@ struct DelimiterIO {
 std::istream& operator>>(std::istream& input, DelimiterIO&& dest);
 bool isEndOfLine(std::istream& input);
 void skipSpaces(std::istream& input);
+
+class IOguard
+{
+public:
+  explicit IOguard(std::basic_ios< char >& s);
+  ~IOguard();
+
+private:
+  std::basic_ios< char >& s_;
+  std::streamsize width_;
+  char fill_;
+  std::streamsize precision_;
+  std::basic_ios< char >::fmtflags fmt_;
+};
 }
 }
 
