@@ -79,9 +79,11 @@ std::istream& operator>>(std::istream& input, Polygon& v)
 
 bool checkPolygonIntersection(const Polygon& lhs, const Polygon& rhs)
 {
+  if (lhs == rhs) {
+    return true;
+  }
   std::vector< size_t > indices(lhs.points.size());
   std::iota(indices.begin(), indices.end(), 0);
-
   using namespace std::placeholders;
   return std::any_of(
       indices.begin(), indices.end(),
@@ -210,25 +212,31 @@ double areaOfTriangle(const Point& p0, const Point& p1, const Point& p2)
 double areaOfPolygon(const Polygon& polygon)
 {
   const auto& v = polygon.points;
-  if (v.size() < 3) {
+  size_t n = v.size();
+  if (n < 3) {
     return 0.0;
   }
 
-  std::vector< size_t > indices(v.size() - 2);
-  std::iota(indices.begin(), indices.end(), 2);
+  std::vector< size_t > indices(n);
+  std::iota(indices.begin(), indices.end(), 0);
 
-  std::vector< double > triangleAreas;
-  triangleAreas.reserve(indices.size());
+  std::vector< double > crossProducts;
+  crossProducts.reserve(n);
 
   std::transform(
-      indices.begin(), indices.end(), std::back_inserter(triangleAreas),
-      [&v](size_t i) { return areaOfTriangle(v[0], v[i - 1], v[i]); });
+      indices.begin(), indices.end(), std::back_inserter(crossProducts),
+      [&v, n](size_t i) {
+        const Point& current = v[i];
+        const Point& next = v[(i + 1) % n];
+        return static_cast< double >(current.x * next.y) -
+               static_cast< double >(next.x * current.y);
+      });
 
   double totalArea =
-      std::accumulate(triangleAreas.begin(), triangleAreas.end(), 0.0);
-  return std::abs(totalArea);
-}
+      std::accumulate(crossProducts.begin(), crossProducts.end(), 0.0);
 
+  return std::abs(totalArea) / 2.0;
+}
 double polygonVectorAreaSum(const std::vector< Polygon > v)
 {
   std::vector< double > areas;
