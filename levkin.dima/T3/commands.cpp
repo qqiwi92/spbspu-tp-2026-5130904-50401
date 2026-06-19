@@ -4,8 +4,24 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <functional>
+#include <algorithm>
+#include <numeric>
 
 namespace levkin {
+
+using namespace std::placeholders;
+const auto isEvenPolygon =
+    std::bind(detail::isEven, std::bind(detail::getPolygonSize, _1));
+const auto isOddPolygon =
+    std::bind(detail::isOdd, std::bind(detail::getPolygonSize, _1));
+
+auto makeSizeEqualPredicate(size_t target)
+{
+  return std::bind(
+      detail::isSizeEqual, std::bind(detail::getPolygonSize, _1), target);
+}
+
 std::string getWord(std::istream& in)
 {
   std::string s;
@@ -16,7 +32,6 @@ std::string getWord(std::istream& in)
     in.clear();
     return "";
   }
-
   return s;
 }
 
@@ -32,15 +47,12 @@ void cmdArea(
   std::vector< Polygon > filtered;
   filtered.reserve(db.size());
 
-  using namespace detail;
   if (word == "EVEN") {
     std::copy_if(
-        db.begin(), db.end(), std::back_inserter(filtered),
-        std::bind(isEven, std::bind(getPolygonSize, std::placeholders::_1)));
+        db.begin(), db.end(), std::back_inserter(filtered), isEvenPolygon);
   } else if (word == "ODD") {
     std::copy_if(
-        db.begin(), db.end(), std::back_inserter(filtered),
-        std::bind(isOdd, std::bind(getPolygonSize, std::placeholders::_1)));
+        db.begin(), db.end(), std::back_inserter(filtered), isOddPolygon);
   } else if (word == "MEAN") {
     std::copy(db.begin(), db.end(), std::back_inserter(filtered));
   } else {
@@ -48,16 +60,14 @@ void cmdArea(
       size_t targetSize = std::stoull(word);
       std::copy_if(
           db.begin(), db.end(), std::back_inserter(filtered),
-          std::bind(
-              isSizeEqual, std::bind(getPolygonSize, std::placeholders::_1),
-              targetSize));
+          makeSizeEqualPredicate(targetSize));
     } catch (...) {
       out << "<INVALID COMMAND>\n";
       return;
     }
   }
 
-  double totalArea = polygonVectorAreaSum(filtered);
+  double totalArea = detail::polygonVectorAreaSum(filtered);
 
   detail::IOguard guard(out);
   out << std::fixed << std::setprecision(1);
@@ -68,6 +78,7 @@ void cmdArea(
     out << totalArea << "\n";
   }
 }
+
 void cmdMax(
     std::istream& in, std::ostream& out, const std::vector< Polygon >& db)
 {
@@ -107,6 +118,37 @@ void cmdMin(
     out << detail::getPolygonSize(*it) << "\n";
   }
 }
+
+void cmdCount(
+    std::istream& in, std::ostream& out, const std::vector< Polygon >& db)
+{
+  std::string word = getWord(in);
+  if (word.empty()) {
+    out << "<INVALID COMMAND>\n";
+    return;
+  }
+
+  ptrdiff_t count = 0;
+
+  if (word == "EVEN") {
+    count = std::count_if(db.begin(), db.end(), isEvenPolygon);
+  } else if (word == "ODD") {
+    count = std::count_if(db.begin(), db.end(), isOddPolygon);
+  } else {
+    try {
+      size_t targetSize = std::stoull(word);
+      count = std::count_if(
+          db.begin(), db.end(), makeSizeEqualPredicate(targetSize));
+    } catch (...) {
+      out << "<INVALID COMMAND>\n";
+      return;
+    }
+  }
+
+  detail::IOguard guard(out);
+  out << count << "\n";
+}
+
 Cmds getCmds()
 {
   Cmds cmds;
@@ -115,7 +157,6 @@ Cmds getCmds()
   cmds["MIN"] = cmdMin;
   cmds["COUNT"] = cmdCount;
   cmds["INTERSECTIONS"] = cmdIntersections;
-  cmds["COUNT"] = cmdCount;
   cmds["MAXSEQ"] = cmdMaxSeq;
   return cmds;
 }
