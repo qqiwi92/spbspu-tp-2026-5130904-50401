@@ -20,9 +20,16 @@ std::string getWord(std::istream& in)
   return s;
 }
 
-void note(std::istream& in, std::ostream&, Database& db)
+double areaOfPolygon(Polygon & p) {
+    
+}
+
+void cmdArea(std::istream& in, std::ostream&, Database& db)
 {
-  //
+  std::string word = getWord(in);
+  if (word == "EVEN") {
+      
+  }
 }
 
 Cmds getCmds()

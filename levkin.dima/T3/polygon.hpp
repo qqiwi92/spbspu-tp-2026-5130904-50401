@@ -17,6 +17,9 @@ std::istream& operator>>(std::istream& os, Point& p);
 std::istream& operator>>(std::istream& os, Polygon& p);
 
 namespace detail {
+double areaOfTriangle(Polygon& p);
+double areaOfPolygon(Polygon & p);
+
 struct DelimiterIO {
   char val;
 };
