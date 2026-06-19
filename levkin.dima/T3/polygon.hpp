@@ -15,6 +15,8 @@ struct Polygon {
 void getPolygons(std::istream& input, std::vector< Polygon >& polygons);
 std::istream& operator>>(std::istream& os, Point& p);
 std::istream& operator>>(std::istream& os, Polygon& p);
+bool operator==(const Point& lhs, const Point& rhs);
+bool operator==(const Polygon& lhs, const Polygon& rhs);
 
 namespace detail {
 bool compareAreaLess(const Polygon& a, const Polygon& b);

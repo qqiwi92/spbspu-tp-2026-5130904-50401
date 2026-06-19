@@ -6,7 +6,18 @@
 #include <numeric>
 
 namespace levkin {
+bool operator==(const Point& lhs, const Point& rhs)
+{
+  return lhs.x == rhs.x && lhs.y == rhs.y;
+}
 
+bool operator==(const Polygon& lhs, const Polygon& rhs)
+{
+  if (lhs.points.size() != rhs.points.size()) {
+    return false;
+  }
+  return std::equal(lhs.points.begin(), lhs.points.end(), rhs.points.begin());
+}
 std::istream& operator>>(std::istream& input, Point& v)
 {
   std::istream::sentry sentry(input);
@@ -48,15 +59,15 @@ std::istream& operator>>(std::istream& input, Polygon& v)
 }
 
 namespace detail {
-    bool compareAreaLess(const Polygon& a, const Polygon& b)
-    {
-      return areaOfPolygon(a) < areaOfPolygon(b);
-    }
-    
-    bool compareVertexesLess(const Polygon& a, const Polygon& b)
-    {
-      return detail::getPolygonSize(a) < detail::getPolygonSize(b);
-    }
+bool compareAreaLess(const Polygon& a, const Polygon& b)
+{
+  return areaOfPolygon(a) < areaOfPolygon(b);
+}
+
+bool compareVertexesLess(const Polygon& a, const Polygon& b)
+{
+  return detail::getPolygonSize(a) < detail::getPolygonSize(b);
+}
 size_t getPolygonSize(const Polygon& poly) { return poly.points.size(); }
 bool isEven(size_t n) { return n % 2 == 0; }
 bool isOdd(size_t n) { return n % 2 != 0; }
