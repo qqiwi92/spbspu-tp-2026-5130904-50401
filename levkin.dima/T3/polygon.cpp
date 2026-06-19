@@ -48,6 +48,19 @@ std::istream& operator>>(std::istream& input, Polygon& v)
 }
 
 namespace detail {
+    bool compareAreaLess(const Polygon& a, const Polygon& b)
+    {
+      return areaOfPolygon(a) < areaOfPolygon(b);
+    }
+    
+    bool compareVertexesLess(const Polygon& a, const Polygon& b)
+    {
+      return detail::getPolygonSize(a) < detail::getPolygonSize(b);
+    }
+size_t getPolygonSize(const Polygon& poly) { return poly.points.size(); }
+bool isEven(size_t n) { return n % 2 == 0; }
+bool isOdd(size_t n) { return n % 2 != 0; }
+bool isSizeEqual(size_t n, size_t target) { return n == target; }
 void skipSpaces(std::istream& is)
 {
   int ch = 0;
@@ -122,4 +135,12 @@ double areaOfPolygon(const Polygon& polygon)
       std::accumulate(triangleAreas.begin(), triangleAreas.end(), 0.0);
   return std::abs(totalArea);
 }
+double polygonVectorAreaSum(std::vector< Polygon > v)
+{
+  std::vector< double > areas;
+  std::transform(v.begin(), v.end(), std::back_inserter(areas), areaOfPolygon);
+  double result = std::accumulate(areas.begin(), areas.end(), 0.0);
+  return result;
+}
+
 }
