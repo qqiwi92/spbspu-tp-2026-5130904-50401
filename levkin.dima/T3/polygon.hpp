@@ -24,6 +24,7 @@ bool isCross(int min1, int max1, int min2, int max2);
 bool isIntersect(const Segment& s1, const Segment& s2);
 bool checkPolygonIntersection(const Polygon& lhs, const Polygon& rhs);
 namespace detail {
+bool isPointInsidePolygon(const Point& p, const Polygon& poly);
 Segment getSegment(const Polygon& poly, size_t i);
 bool isSegmentIntersectPolygon(const Segment& seg, const Polygon& poly);
 int areaSign(const Point& a, const Point& b, const Point& c);
